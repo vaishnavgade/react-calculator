@@ -13,12 +13,20 @@ function Key(props){
 class Calculator extends React.Component{
     constructor(props){
         super(props);
+        this.state = {
+            value:0,
+        };
 
         this.handleClick = this.handleClick.bind(this);
+        this.handleChange = this.handleChange.bind(this);
     }
 
     handleClick(event){
 
+    }
+
+    handleChange(event){
+        
     }
 
     renderKey(value, className){
@@ -30,7 +38,7 @@ class Calculator extends React.Component{
     render(){
         return(
             <div>
-                <input type="text" />
+                <input type="text" value={this.state.value} onChange={this.handleChange}/>
                 <div className="calc-row">
                     {this.renderKey("AC", "top-key")}
                     {this.renderKey("%", "top-key")}

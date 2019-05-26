@@ -15,8 +15,11 @@ code {
 input{
   height: 70px;
   width: 217px;
-  text-align: left;  
-  background: #595959;  
+  text-align: right;  
+  background: #595959; 
+  color: #fff; 
+  font-size: 40px;
+  font-weight: bold;
   border: 1px solid #595959;
 }
 

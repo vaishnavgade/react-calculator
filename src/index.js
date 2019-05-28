@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 const listOfOperations = [ "%",  "/", "*", "-", "+"];
-const equalityChar = "=";
+const equalityChar = '=';
 
 function Key(props){
     return (
@@ -25,6 +25,7 @@ class Calculator extends React.Component{
 
         this.handleClick = this.handleClick.bind(this);
         this.handleChange = this.handleChange.bind(this);
+        this.handleSumbit = this.handleSumbit.bind(this);
     }
 
     handleClick(event){
@@ -33,87 +34,92 @@ class Calculator extends React.Component{
 
     handleChange(event){
         const userInput = event.target.value;
-        this.setState({
-            value: userInput,
-        });
-
-        const lastValue = userInput.charAt(userInput.length - 1);
-
-        // check if lastValue is '=' and calculate result
-        if(equalityChar === lastValue){
-            const numbersArr = this.state.numbers.slice();
-            const operationsArr = this.state.operations.slice();
-            let result = 0;
-            switch(operationsArr[0]){
-                case '+':
-                    result = parseInt(numbersArr[0]) + parseInt(numbersArr[1]);
-                    break;
-                case '-':
-                    result = parseInt(numbersArr[0]) - parseInt(numbersArr[1]);
-                    break;
-                case '/':
-                    result = parseInt(numbersArr[0]) / parseInt(numbersArr[1]);
-                    break;
-                case '*':
-                    result = parseInt(numbersArr[0]) * parseInt(numbersArr[1]);
-                    break;
-                case '%':
-                    result = parseInt(numbersArr[0]) % parseInt(numbersArr[1]);
-                    break;
-                default:
-                    result = 0;
-                    break;
-            }
-            
-            // Display result, clear numbers and push result for further operations
-            // clear operations and reset isOperation flag
+        if(!userInput.includes(equalityChar)){        
             this.setState({
-                value: result,
-                numbers:[].push(result),
-                operations:[],
-                isOperation: false,
+                value: userInput,
             });
-        }
 
-        // check if last entered character is an operation
-        if(!listOfOperations.includes(lastValue)){
-            if(!this.state.isOperation){
-                let numbersArr = this.state.numbers.slice();
-                // modify the last element with user input
-                if(numbersArr.length === 0){
+            const lastValue = userInput.charAt(userInput.length - 1);
+
+            // check if last entered character is an operation
+            if(!listOfOperations.includes(lastValue)){
+                if(!this.state.isOperation){
+                    let numbersArr = this.state.numbers.slice();
+                    // modify the last element with user input
+                    if(numbersArr.length === 0){
+                        numbersArr.push(lastValue);
+                    }
+                    else{
+                        numbersArr[numbersArr.length - 1]
+                            = String(numbersArr[numbersArr.length - 1]).concat(lastValue);
+                        console.log(numbersArr);
+                    }
+
+                    this.setState({
+                        numbers: numbersArr,
+                    });
+                }
+                else if(this.state.isOperation){
+                    // when we encounter an operation symbol, push to the last instead of modifying the last element
+                    // reset isOperation flag
+                    let numbersArr = this.state.numbers.slice();
                     numbersArr.push(lastValue);
+                    this.setState({
+                        numbers: numbersArr,
+                        isOperation: false,
+                    })
                 }
-                else{
-                    numbersArr[numbersArr.length - 1]
-                        = numbersArr[numbersArr.length - 1].concat(lastValue);
+            }
+            else if(listOfOperations.includes(lastValue)){
+                // Avoid adding operators when we just added one
+                if(!this.state.isOperation){
+                    const operations = this.state.operations.slice();
+                    operations.push(lastValue);
+                    this.setState({
+                        operations: operations,
+                        isOperation: true,
+                    });
                 }
+            }     
+        }   
+    }
 
-                this.setState({
-                    numbers: numbersArr,
-                });
-            }
-            else if(this.state.isOperation){
-                // when we encounter an operation symbol, push to the last instead of modifying the last element
-                // reset isOperation flag
-                let numbersArr = this.state.numbers.slice();
-                numbersArr.push(lastValue);
-                this.setState({
-                    numbers: numbersArr,
-                    isOperation: false,
-                })
-            }
+    handleSumbit(event){
+        event.preventDefault();
+
+        const numbersArr = this.state.numbers.slice();
+        const operationsArr = this.state.operations.slice();
+        let result = 0;
+        switch(operationsArr[0]){
+            case '+':
+                result = parseInt(numbersArr[0]) + parseInt(numbersArr[1]);
+                break;
+            case '-':
+                result = parseInt(numbersArr[0]) - parseInt(numbersArr[1]);
+                break;
+            case '/':
+                result = parseInt(numbersArr[0]) / parseInt(numbersArr[1]);
+                break;
+            case '*':
+                result = parseInt(numbersArr[0]) * parseInt(numbersArr[1]);
+                break;
+            case '%':
+                result = parseInt(numbersArr[0]) % parseInt(numbersArr[1]);
+                break;
+            default:
+                result = 0;
+                break;
         }
-        else if(listOfOperations.includes(lastValue)){
-            // Avoid adding operators when we just added one
-            if(!this.state.isOperation){
-                const operations = this.state.operations.slice();
-                operations.push(lastValue);
-                this.setState({
-                    operations: operations,
-                    isOperation: true,
-                });
-            }
-        }        
+        
+        // Display result, clear numbers and push result for further operations
+        // clear operations and reset isOperation flag
+        const newNumbers = [result];
+        this.setState({
+            value: result,
+            numbers: newNumbers,
+            operations:[],
+            isOperation: false,
+        });
     }
 
     renderKey(value, className){
@@ -125,7 +131,9 @@ class Calculator extends React.Component{
     render(){
         return(
             <div>
-                <input type="text" className="inputBox" value={this.state.value} onChange={this.handleChange}/>
+                <form onSubmit={this.handleSumbit}>
+                    <input type="text" className="inputBox" value={this.state.value} onChange={this.handleChange}/>
+                </form>
                 <div className="calc-row">
                     {this.renderKey("AC", "top-key")}
                     {this.renderKey("%", "top-key")}

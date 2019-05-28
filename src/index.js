@@ -2,8 +2,9 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
-const listOfOperations = [ "%",  "/", "*", "-", "+"];
 const equalityChar = '=';
+const resetChar = "AC";
+const listOfOperations = [ resetChar, "%",  "/", "*", "-", "+", equalityChar];
 
 function Key(props){
     return (
@@ -28,65 +29,50 @@ class Calculator extends React.Component{
         this.handleSumbit = this.handleSumbit.bind(this);
     }
 
-    handleClick(event){
-
-    }
-
-    handleChange(event){
-        const userInput = event.target.value;
-        if(!userInput.includes(equalityChar)){        
-            this.setState({
-                value: userInput,
-            });
-
-            const lastValue = userInput.charAt(userInput.length - 1);
-
-            // check if last entered character is an operation
-            if(!listOfOperations.includes(lastValue)){
-                if(!this.state.isOperation){
-                    let numbersArr = this.state.numbers.slice();
-                    // modify the last element with user input
-                    if(numbersArr.length === 0){
-                        numbersArr.push(lastValue);
-                    }
-                    else{
-                        numbersArr[numbersArr.length - 1]
-                            = String(numbersArr[numbersArr.length - 1]).concat(lastValue);
-                        console.log(numbersArr);
-                    }
-
-                    this.setState({
-                        numbers: numbersArr,
-                    });
+    storeInput(value){
+        // check if last entered character is an operation
+        if(!listOfOperations.includes(value)){
+            if(!this.state.isOperation){
+                let numbersArr = this.state.numbers.slice();
+                // modify the last element with user input
+                if(numbersArr.length === 0){
+                    numbersArr.push(value);
                 }
-                else if(this.state.isOperation){
-                    // when we encounter an operation symbol, push to the last instead of modifying the last element
-                    // reset isOperation flag
-                    let numbersArr = this.state.numbers.slice();
-                    numbersArr.push(lastValue);
-                    this.setState({
-                        numbers: numbersArr,
-                        isOperation: false,
-                    })
+                else{
+                    numbersArr[numbersArr.length - 1]
+                        = String(numbersArr[numbersArr.length - 1]).concat(value);
+                    console.log(numbersArr);
                 }
+
+                this.setState({
+                    numbers: numbersArr,
+                });
             }
-            else if(listOfOperations.includes(lastValue)){
-                // Avoid adding operators when we just added one
-                if(!this.state.isOperation){
-                    const operations = this.state.operations.slice();
-                    operations.push(lastValue);
-                    this.setState({
-                        operations: operations,
-                        isOperation: true,
-                    });
-                }
-            }     
-        }   
+            else if(this.state.isOperation){
+                // when we encounter an operation symbol, push to the last instead of modifying the last element
+                // reset isOperation flag
+                let numbersArr = this.state.numbers.slice();
+                numbersArr.push(value);
+                this.setState({
+                    numbers: numbersArr,
+                    isOperation: false,
+                })
+            }
+        }
+        else if(listOfOperations.includes(value)){
+            // Avoid adding operators when we just added one
+            if(!this.state.isOperation){
+                const operations = this.state.operations.slice();
+                operations.push(value);
+                this.setState({
+                    operations: operations,
+                    isOperation: true,
+                });
+            }
+        } 
     }
 
-    handleSumbit(event){
-        event.preventDefault();
-
+    calculateResult(){
         const numbersArr = this.state.numbers.slice();
         const operationsArr = this.state.operations.slice();
         let result = 0;
@@ -122,9 +108,50 @@ class Calculator extends React.Component{
         });
     }
 
+    handleClick(value){
+        if(value.includes(resetChar)){
+            this.setState({
+                value: "",
+                numbers: [],
+                operations: [],
+                isOperation: false,
+            });
+        }
+        else if(value.includes(equalityChar)){
+            this.calculateResult();
+        }
+        
+
+        if(!value.includes(equalityChar) && !value.includes(resetChar)){        
+            this.setState({
+                value: String(this.state.value).concat(value),
+            });
+
+            this.storeInput(value);
+        }        
+    }
+
+    handleChange(event){
+        const userInput = event.target.value;
+        if(!userInput.includes(equalityChar)){        
+            this.setState({
+                value: userInput,
+            });
+
+            const lastValue = userInput.charAt(userInput.length - 1);
+            this.storeInput(lastValue);    
+        }   
+    }
+
+    handleSumbit(event){
+        event.preventDefault();
+
+        this.calculateResult();
+    }
+
     renderKey(value, className){
         return(
-            <Key value={value} className={className} onClick={this.handleClick}/>
+            <Key value={value} className={className} onClick={() => this.handleClick(value)}/>
         );
     }
 

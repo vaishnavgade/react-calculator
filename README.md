@@ -4,6 +4,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 A simple Calculator App written in ReactJS. Check out [the demo](https://vaishnavgade.github.io/react-calculator/)
 
+## Planned Changes
+
+- Implement Unit testing using Jest framework
+
 ## Deployment
 
 This app was built using [GitHub Pages](https://pages.github.com).
